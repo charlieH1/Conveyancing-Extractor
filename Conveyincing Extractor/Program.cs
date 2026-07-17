@@ -1,7 +1,26 @@
+using Conveyincing_Extractor.Services;
+using Conveyincing_Extractor.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+
+// Each scraper gets its own typed HttpClient registered against its concrete type.
+// Use a factory delegate for IScraper so the instance always comes from IHttpClientFactory.
+// To add a new scraper: AddHttpClient<NewScraper>(...) + AddTransient<IScraper>(sp => sp.GetRequiredService<NewScraper>())
+builder.Services.AddHttpClient<SolicitorscomScraper>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("User-Agent",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+        "(KHTML, like Gecko) Chrome/124.0 Safari/537.36");
+    client.DefaultRequestHeaders.Add("Accept",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+    client.DefaultRequestHeaders.Add("Accept-Language", "en-GB,en;q=0.5");
+});
+builder.Services.AddTransient<IScraper>(sp => sp.GetRequiredService<SolicitorscomScraper>());
 
 var app = builder.Build();
 
