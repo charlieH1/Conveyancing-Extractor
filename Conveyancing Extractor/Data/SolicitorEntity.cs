@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Conveyincing_Extractor.Data
+namespace Conveyancing_Extractor.Data
 {
     /// <summary>
     /// Persistent record of a solicitor listing scraped from a source site.

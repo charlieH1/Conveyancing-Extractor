@@ -1,9 +1,9 @@
-using Conveyincing_Extractor.Data;
-using Conveyincing_Extractor.Domain;
-using Conveyincing_Extractor.Services.Interfaces;
+using Conveyancing_Extractor.Data;
+using Conveyancing_Extractor.Domain;
+using Conveyancing_Extractor.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Conveyincing_Extractor.Controllers
+namespace Conveyancing_Extractor.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -1,8 +1,8 @@
-using Conveyincing_Extractor.Models;
+using Conveyancing_Extractor.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Conveyincing_Extractor.Controllers
+namespace Conveyancing_Extractor.Controllers
 {
     public class HomeController : Controller
     {

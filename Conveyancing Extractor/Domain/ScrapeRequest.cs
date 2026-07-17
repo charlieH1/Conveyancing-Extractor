@@ -1,4 +1,4 @@
-namespace Conveyincing_Extractor.Domain
+namespace Conveyancing_Extractor.Domain
 {
     public class ScrapeRequest
     {
