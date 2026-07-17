@@ -1,8 +1,330 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Conveyancing Solicitor Extractor";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-xl py-4">
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-0 fw-bold">Conveyancing Solicitor Extractor</h1>
+            <p class="text-muted mb-0 small">Powered by solicitors.com</p>
+        </div>
+    </div>
+
+    <!-- ── Location configurator ──────────────────────────────────────────── -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">Locations to search</div>
+        <div class="card-body">
+            <div id="locationTags" class="d-flex flex-wrap gap-2 mb-3"></div>
+            <div class="input-group" style="max-width:340px">
+                <input id="newLocation" type="text" class="form-control" placeholder="Add a location…" />
+                <button class="btn btn-outline-secondary" onclick="addLocation()">Add</button>
+            </div>
+        </div>
+        <div class="card-footer d-flex gap-2">
+            <button id="btnScrape" class="btn btn-primary" onclick="runScrape()">
+                <span id="scrapeSpinner" class="spinner-border spinner-border-sm d-none me-1" role="status"></span>
+                Run Scrape
+            </button>
+            <button class="btn btn-outline-secondary" onclick="resetLocations()">Reset to defaults</button>
+        </div>
+    </div>
+
+    <!-- ── Alert area ─────────────────────────────────────────────────────── -->
+    <div id="alertArea"></div>
+
+    <!-- ── Report (hidden until results arrive) ───────────────────────────── -->
+    <div id="reportSection" class="d-none">
+
+        <!-- Summary cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100 shadow-sm border-primary">
+                    <div class="card-body">
+                        <div class="display-6 fw-bold text-primary" id="statTotal">–</div>
+                        <div class="text-muted small">Solicitors found</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="display-6 fw-bold" id="statLocations">–</div>
+                        <div class="text-muted small">Locations searched</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="display-6 fw-bold" id="statAvgRating">–</div>
+                        <div class="text-muted small">Avg rating</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="display-6 fw-bold" id="statGenerated">–</div>
+                        <div class="text-muted small">Generated at</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solicitors per location bar chart -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header fw-semibold">Solicitors by location</div>
+            <div class="card-body" id="locationChart"></div>
+        </div>
+
+        <!-- Top rated solicitors -->
+        <div class="card shadow-sm mb-4" id="topRatedCard">
+            <div class="card-header fw-semibold">Top rated solicitors</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Location</th>
+                                <th>Rating</th>
+                                <th>Reviews</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topRatedBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full results table -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center fw-semibold">
+                <span>All results</span>
+                <input id="filterInput" type="search" class="form-control form-control-sm w-auto"
+                       placeholder="Filter…" oninput="filterTable()" />
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0" id="resultsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th onclick="sortTable(0)" style="cursor:pointer">Name ⇅</th>
+                                <th onclick="sortTable(1)" style="cursor:pointer">Location ⇅</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Website</th>
+                                <th onclick="sortTable(5)" style="cursor:pointer">Rating ⇅</th>
+                                <th onclick="sortTable(6)" style="cursor:pointer">Reviews ⇅</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+<script>
+    // ── State ──────────────────────────────────────────────────────────────────
+    let locations = [];
+    let allRows = [];
+    let sortAsc = true;
+    let lastSortCol = -1;
+
+    // ── Bootstrap ──────────────────────────────────────────────────────────────
+    async function init() {
+        const res = await fetch('/api/scraper/locations');
+        locations = await res.json();
+        renderTags();
+    }
+
+    function renderTags() {
+        const container = document.getElementById('locationTags');
+        container.innerHTML = locations.map(loc =>
+            `<span class="badge bg-secondary d-flex align-items-center gap-1 fs-6 fw-normal px-3 py-2">
+                ${escHtml(loc)}
+                <button type="button" class="btn-close btn-close-white btn-sm ms-1"
+                        aria-label="Remove" onclick="removeLocation('${escHtml(loc)}')"></button>
+             </span>`
+        ).join('');
+    }
+
+    function addLocation() {
+        const input = document.getElementById('newLocation');
+        const val = input.value.trim();
+        if (val && !locations.includes(val)) {
+            locations.push(val);
+            renderTags();
+        }
+        input.value = '';
+        input.focus();
+    }
+
+    document.getElementById('newLocation').addEventListener('keydown', e => {
+        if (e.key === 'Enter') addLocation();
+    });
+
+    function removeLocation(loc) {
+        locations = locations.filter(l => l !== loc);
+        renderTags();
+    }
+
+    function resetLocations() {
+        fetch('/api/scraper/locations').then(r => r.json()).then(d => { locations = d; renderTags(); });
+    }
+
+    // ── Scrape ─────────────────────────────────────────────────────────────────
+    async function runScrape() {
+        if (locations.length === 0) { showAlert('Add at least one location.', 'warning'); return; }
+
+        setBusy(true);
+        clearAlert();
+        document.getElementById('reportSection').classList.add('d-none');
+
+        try {
+            const resp = await fetch('/api/scraper/scrape', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ locations })
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({ error: resp.statusText }));
+                throw new Error(err.error || resp.statusText);
+            }
+
+            const report = await resp.json();
+            renderReport(report);
+        } catch (e) {
+            showAlert('Scrape failed: ' + e.message, 'danger');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // ── Report rendering ───────────────────────────────────────────────────────
+    function renderReport(report) {
+        // Summary cards
+        document.getElementById('statTotal').textContent = report.totalSolicitors;
+        document.getElementById('statLocations').textContent = report.locationsSearched.length;
+        document.getElementById('statAvgRating').textContent = report.averageRating != null ? report.averageRating.toFixed(1) + ' ★' : 'N/A';
+        document.getElementById('statGenerated').textContent = new Date(report.generatedAt).toLocaleTimeString();
+
+        // Location bar chart
+        const maxCount = Math.max(...report.byLocation.map(l => l.count), 1);
+        document.getElementById('locationChart').innerHTML = report.byLocation.map(l => `
+            <div class="d-flex align-items-center mb-2">
+                <div class="text-end me-2" style="min-width:110px;font-size:.85rem">${escHtml(l.location)}</div>
+                <div class="flex-grow-1 bg-light rounded overflow-hidden" style="height:24px">
+                    <div class="bg-primary h-100 d-flex align-items-center ps-2 text-white"
+                         style="width:${Math.round(l.count / maxCount * 100)}%;font-size:.8rem;min-width:30px;transition:width .4s">
+                        ${l.count}
+                    </div>
+                </div>
+                ${l.averageRating != null ? `<span class="ms-2 text-muted small">${l.averageRating.toFixed(1)} ★</span>` : ''}
+            </div>`).join('');
+
+        // Top rated table
+        const topRatedBody = document.getElementById('topRatedBody');
+        if (report.topRated.length > 0) {
+            topRatedBody.innerHTML = report.topRated.map((s, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${profileLink(s)}</td>
+                    <td><span class="badge bg-light text-dark border">${escHtml(s.location)}</span></td>
+                    <td>${starBadge(s.rating)}</td>
+                    <td>${s.reviewCount != null ? s.reviewCount : '–'}</td>
+                    <td>${s.phone ? `<a href="tel:${escHtml(s.phone)}">${escHtml(s.phone)}</a>` : '–'}</td>
+                </tr>`).join('');
+            document.getElementById('topRatedCard').classList.remove('d-none');
+        } else {
+            document.getElementById('topRatedCard').classList.add('d-none');
+        }
+
+        // All results table
+        allRows = report.results;
+        renderResultsTable(allRows);
+
+        document.getElementById('reportSection').classList.remove('d-none');
+    }
+
+    function renderResultsTable(rows) {
+        document.getElementById('resultsBody').innerHTML = rows.map(s => `
+            <tr>
+                <td>${profileLink(s)}</td>
+                <td><span class="badge bg-light text-dark border">${escHtml(s.location)}</span></td>
+                <td class="text-muted small">${escHtml(s.address)}</td>
+                <td>${s.phone ? `<a href="tel:${escHtml(s.phone)}">${escHtml(s.phone)}</a>` : '–'}</td>
+                <td>${s.website ? `<a href="${escHtml(s.website)}" target="_blank" rel="noopener">Visit</a>` : '–'}</td>
+                <td>${starBadge(s.rating)}</td>
+                <td>${s.reviewCount != null ? s.reviewCount : '–'}</td>
+            </tr>`).join('');
+    }
+
+    // ── Table helpers ──────────────────────────────────────────────────────────
+    function filterTable() {
+        const q = document.getElementById('filterInput').value.toLowerCase();
+        const filtered = q ? allRows.filter(r =>
+            (r.name + r.location + r.address + r.phone).toLowerCase().includes(q)) : allRows;
+        renderResultsTable(filtered);
+    }
+
+    function sortTable(col) {
+        const cols = ['name', 'location', 'address', 'phone', 'website', 'rating', 'reviewCount'];
+        sortAsc = lastSortCol === col ? !sortAsc : true;
+        lastSortCol = col;
+        const key = cols[col];
+        allRows.sort((a, b) => {
+            const av = a[key] ?? '';
+            const bv = b[key] ?? '';
+            return sortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+        });
+        renderResultsTable(allRows);
+    }
+
+    // ── UI utilities ───────────────────────────────────────────────────────────
+    function profileLink(s) {
+        return s.profileUrl
+            ? `<a href="${escHtml(s.profileUrl)}" target="_blank" rel="noopener">${escHtml(s.name)}</a>`
+            : escHtml(s.name);
+    }
+
+    function starBadge(rating) {
+        if (rating == null) return '–';
+        const cls = rating >= 4 ? 'bg-success' : rating >= 3 ? 'bg-warning text-dark' : 'bg-secondary';
+        return `<span class="badge ${cls}">${rating.toFixed(1)} ★</span>`;
+    }
+
+    function setBusy(busy) {
+        document.getElementById('btnScrape').disabled = busy;
+        document.getElementById('scrapeSpinner').classList.toggle('d-none', !busy);
+    }
+
+    function showAlert(msg, type) {
+        document.getElementById('alertArea').innerHTML =
+            `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${escHtml(msg)}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+             </div>`;
+    }
+
+    function clearAlert() { document.getElementById('alertArea').innerHTML = ''; }
+
+    function escHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ── Start ──────────────────────────────────────────────────────────────────
+    init();
+</script>
+}
+
