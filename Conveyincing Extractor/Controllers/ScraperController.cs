@@ -1,3 +1,4 @@
+using Conveyincing_Extractor.Data;
 using Conveyincing_Extractor.Domain;
 using Conveyincing_Extractor.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,10 @@ namespace Conveyincing_Extractor.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ScraperController(IEnumerable<IScraper> scrapers, ILogger<ScraperController> logger) : ControllerBase
+    public class ScraperController(
+        IEnumerable<IScraper> scrapers,
+        ISolicitorRepository repository,
+        ILogger<ScraperController> logger) : ControllerBase
     {
         private static readonly string[] DefaultLocations =
         [
@@ -15,6 +19,7 @@ namespace Conveyincing_Extractor.Controllers
         ];
 
         private readonly IEnumerable<IScraper> _scrapers = scrapers;
+        private readonly ISolicitorRepository _repository = repository;
         private readonly ILogger<ScraperController> _logger = logger;
 
         /// <summary>
@@ -55,7 +60,9 @@ namespace Conveyincing_Extractor.Controllers
                 string.Join(", ", scrapers.Select(s => s.Source)));
 
             var tasks = scrapers.Select(s => s.ScrapeAsync(request.Locations, cancellationToken));
-            var results = (await Task.WhenAll(tasks)).SelectMany(r => r).ToList();
+            var scraped = (await Task.WhenAll(tasks)).SelectMany(r => r).ToList();
+
+            var results = await _repository.SyncAsync(scraped, request.Locations, cancellationToken);
 
             var report = new ScrapeReport
             {

@@ -1,11 +1,18 @@
+using Conveyincing_Extractor.Data;
 using Conveyincing_Extractor.Services;
 using Conveyincing_Extractor.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ISolicitorRepository, SolicitorRepository>();
 
 // Each scraper gets its own typed HttpClient registered against its concrete type.
 // Use a factory delegate for IScraper so the instance always comes from IHttpClientFactory.
