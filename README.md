@@ -36,7 +36,7 @@ dotnet run
 
 ## Known Limitations
 
-- **Solicitors.com** displays different results on each page load, sometimes removing a solicitor and replacing it with another. There is no unique identifier per solicitor, so matching relies on name, address, location, and source. As a result, accurate updates are not always possible and deletions are not performed, since it cannot be determined whether a solicitor has truly been removed.
+- **Solicitors.com** displays different results on each page load, sometimes removing a solicitor and replacing it with another. There is no unique identifier per solicitor, so matching relies on name, address, location, and source. As a result, accurate updates are not always possible and deletions are not performed, since it cannot be determined whether a solicitor has truly been removed. This also leads to a large number of "New" solicitors being shown the first few times you run a scrape
 
 ## Future Work
 
