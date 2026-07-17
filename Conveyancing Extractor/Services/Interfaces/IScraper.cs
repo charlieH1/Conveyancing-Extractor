@@ -1,6 +1,6 @@
-﻿using Conveyincing_Extractor.Domain;
+﻿using Conveyancing_Extractor.Domain;
 
-namespace Conveyincing_Extractor.Services.Interfaces
+namespace Conveyancing_Extractor.Services.Interfaces
 {
     public interface IScraper
     {

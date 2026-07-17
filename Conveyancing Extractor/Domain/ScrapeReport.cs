@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace Conveyincing_Extractor.Domain
+namespace Conveyancing_Extractor.Domain
 {
 
     public class ScrapeReport

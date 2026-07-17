@@ -1,4 +1,4 @@
-namespace Conveyincing_Extractor.Models
+namespace Conveyancing_Extractor.Models
 {
     public class ErrorViewModel
     {

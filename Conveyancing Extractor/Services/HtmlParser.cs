@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace Conveyincing_Extractor.Services
+namespace Conveyancing_Extractor.Services
 {
     /// <summary>
     /// Minimal regex-based HTML utility. No third-party libraries.

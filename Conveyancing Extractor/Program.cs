@@ -1,6 +1,6 @@
-using Conveyincing_Extractor.Data;
-using Conveyincing_Extractor.Services;
-using Conveyincing_Extractor.Services.Interfaces;
+using Conveyancing_Extractor.Data;
+using Conveyancing_Extractor.Services;
+using Conveyancing_Extractor.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

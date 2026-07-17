@@ -1,7 +1,7 @@
-using Conveyincing_Extractor.Domain;
+using Conveyancing_Extractor.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Conveyincing_Extractor.Data
+namespace Conveyancing_Extractor.Data
 {
     public class SolicitorRepository(AppDbContext db) : ISolicitorRepository
     {

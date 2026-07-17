@@ -1,6 +1,6 @@
-using Conveyincing_Extractor.Domain;
+using Conveyancing_Extractor.Domain;
 
-namespace Conveyincing_Extractor.Data
+namespace Conveyancing_Extractor.Data
 {
     /// <summary>
     /// Persists scrape results and returns them enriched with IsNew.

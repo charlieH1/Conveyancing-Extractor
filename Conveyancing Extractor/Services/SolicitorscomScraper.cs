@@ -1,8 +1,8 @@
-﻿using Conveyincing_Extractor.Domain;
-using Conveyincing_Extractor.Services.Interfaces;
+﻿using Conveyancing_Extractor.Domain;
+using Conveyancing_Extractor.Services.Interfaces;
 using System.Text.RegularExpressions;
 
-namespace Conveyincing_Extractor.Services
+namespace Conveyancing_Extractor.Services
 {
     /// <summary>
     /// Scrapes conveyancing solicitor listings from solicitors.com.

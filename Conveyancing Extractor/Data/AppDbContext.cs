@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Conveyincing_Extractor.Data
+namespace Conveyancing_Extractor.Data
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
