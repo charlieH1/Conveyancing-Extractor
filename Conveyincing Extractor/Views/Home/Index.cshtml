@@ -101,6 +101,32 @@
             </div>
         </div>
 
+        <!-- New solicitors table -->
+        <div class="card shadow-sm mb-4 d-none" id="newSolicitorsCard">
+            <div class="card-header d-flex align-items-center gap-2 fw-semibold">
+                <span class="badge bg-success" id="newSolicitorsCount">0</span>
+                New solicitors this run
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Location</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Website</th>
+                                <th>Rating</th>
+                                <th>Reviews</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newSolicitorsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Full results table -->
         <div class="card shadow-sm mb-4">
             <div class="card-header d-flex justify-content-between align-items-center fw-semibold">
@@ -246,6 +272,25 @@
             document.getElementById('topRatedCard').classList.remove('d-none');
         } else {
             document.getElementById('topRatedCard').classList.add('d-none');
+        }
+
+        // New solicitors table
+        const newCard = document.getElementById('newSolicitorsCard');
+        if (report.newSolicitors.length > 0) {
+            document.getElementById('newSolicitorsCount').textContent = report.newSolicitors.length;
+            document.getElementById('newSolicitorsBody').innerHTML = report.newSolicitors.map(s => `
+                <tr>
+                    <td>${profileLink(s)}</td>
+                    <td><span class="badge bg-light text-dark border">${escHtml(s.location)}</span></td>
+                    <td class="text-muted small">${escHtml(s.address)}</td>
+                    <td>${s.phone ? `<a href="tel:${escHtml(s.phone)}">${escHtml(s.phone)}</a>` : '–'}</td>
+                    <td>${s.website ? `<a href="${escHtml(s.website)}" target="_blank" rel="noopener">Visit</a>` : '–'}</td>
+                    <td>${starBadge(s.rating)}</td>
+                    <td>${s.reviewCount != null ? s.reviewCount : '–'}</td>
+                </tr>`).join('');
+            newCard.classList.remove('d-none');
+        } else {
+            newCard.classList.add('d-none');
         }
 
         // All results table

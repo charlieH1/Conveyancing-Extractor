@@ -25,16 +25,7 @@ namespace Conveyincing_Extractor.Data
 
             var existingByKey = existing.ToDictionary(e => e.SolicitorId);
 
-            var scrapedKeys = deduplicated
-                .Select(r => r.SolicitorId)
-                .ToHashSet();
-
-            // Remove rows for scraped locations that are no longer listed
-            var gone = existing
-                .Where(e => !scrapedKeys.Contains(e.SolicitorId))
-                .ToList();
-
-            db.Solicitors.RemoveRange(gone);
+            //removal or results removed as it was discovered that the site displays differnet solicitors each time you browse and not a complete list of them
 
             // Upsert each scraped result
             var enriched = new List<SolicitorResult>(deduplicated.Count);
