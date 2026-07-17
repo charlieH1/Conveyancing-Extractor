@@ -40,8 +40,8 @@ dotnet run
 
 ## Future Work
 
-- **Additional sources** — other sources that provide a full and complete list of solicitors could be added by following the same pattern as the `SolicitorscomScraper`.
-- **Scheduled runs** — a nightly background service could be used to automate data collection.
-- **Email notifications** — with more accurate data, a messaging microservice could be introduced using DAPR and a message bus to trigger email alerts.
-- **CQRS pattern** — for a larger solution with multiple users and significantly more locations, a CQRS approach would be worth considering. A domain service would handle overnight data updates to an SQL instance and publish events consumed by a read service, which could cache commonly queried locations. If paired with the email notifications future work item, the messaging service would also consume these events.
-- **Frontend framework** — this is a proof-of-concept built with C# and a single Razor Page. For a larger project, a dedicated frontend framework such as Angular or React would be worth evaluating.
+- **Additional sources** - other sources that provide a full and complete list of solicitors could be added by following the same pattern as the `SolicitorscomScraper`.
+- **Scheduled runs** - a nightly background service could be used to automate data collection.
+- **Email notifications** - with more accurate data, a messaging microservice could be introduced using DAPR and a message bus to trigger email alerts.
+- **CQRS pattern** - for a larger solution with multiple users and significantly more locations, a CQRS approach would be worth considering. A domain service would handle overnight data updates to an SQL instance and publish events consumed by a read service, which could cache commonly queried locations. If paired with the email notifications future work item, the messaging service would also consume these events.
+- **Frontend framework** - this is a proof-of-concept built with C# and a single Razor Page. For a larger project, a dedicated frontend framework such as Angular or React would be worth evaluating.
