@@ -37,5 +37,11 @@ namespace Conveyincing_Extractor.Domain
                    .ThenByDescending(r => r.ReviewCount)
                    .Take(10)
                    .ToList();
+
+        public IReadOnlyList<SolicitorResult> NewSolicitors =>
+            Results.Where(r => r.IsNew)
+                   .OrderBy(r => r.Location)
+                   .ThenBy(r => r.Name)
+                   .ToList();
     }
 }

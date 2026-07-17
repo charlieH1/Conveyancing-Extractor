@@ -1,4 +1,4 @@
-using Conveyincing_Extractor.Domain;
+﻿using Conveyincing_Extractor.Domain;
 using Conveyincing_Extractor.Services.Interfaces;
 using System.Text.RegularExpressions;
 
@@ -170,8 +170,14 @@ namespace Conveyincing_Extractor.Services
             var reviewText = HtmlParser.Match(revSpan, @"\((\d+)\)");
             int? reviewCount = int.TryParse(reviewText, out var rc) ? rc : null;
 
+            // -- Solicitor ID --------------------------------------------------
+            // SHA-256 of normalised address + source + location gives a stable, branch-unique, location unique identifier
+            
+            var solicitorId = ComputeId(name, address, Source, location);
+
             return new SolicitorResult
             {
+                SolicitorId = solicitorId,
                 Name        = name,
                 Location    = location,
                 Source      = Source,
@@ -183,6 +189,14 @@ namespace Conveyincing_Extractor.Services
                 ProfileUrl  = profileUrl,
                 ScrapedAt   = DateTime.UtcNow
             };
+        }
+
+        private static string ComputeId(string name, string address, string source, string location)
+        {
+            var input = $"{name.Trim().ToLowerInvariant()}|{address.Trim().ToLowerInvariant()}|{source.ToLowerInvariant()}|{location.ToLowerInvariant()}";
+            var hash  = System.Security.Cryptography.SHA256.HashData(
+                            System.Text.Encoding.UTF8.GetBytes(input));
+            return Convert.ToHexString(hash).ToLowerInvariant();
         }
     }
 }
